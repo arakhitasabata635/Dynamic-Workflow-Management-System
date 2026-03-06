@@ -14,13 +14,13 @@ export const Contracts: CollectionConfig = {
       required: true,
     },
     {
+      name: 'description',
+      type: 'textarea',
+    },
+    {
       name: 'amount',
       type: 'number',
       required: true,
-    },
-    {
-      name: 'description',
-      type: 'textarea',
     },
   ],
 }

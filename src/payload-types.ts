@@ -168,8 +168,8 @@ export interface Blog {
 export interface Contract {
   id: number;
   title: string;
-  amount: number;
   description?: string | null;
+  amount: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -185,6 +185,7 @@ export interface Workflow {
     stepName?: string | null;
     stepType?: ('approval' | 'review' | 'sign-off' | 'comment-only') | null;
     assignedRole?: string | null;
+    assignedUser?: (number | null) | User;
     condition?: string | null;
     slaHours?: number | null;
     id?: string | null;
@@ -335,8 +336,8 @@ export interface BlogsSelect<T extends boolean = true> {
  */
 export interface ContractsSelect<T extends boolean = true> {
   title?: T;
-  amount?: T;
   description?: T;
+  amount?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -353,6 +354,7 @@ export interface WorkflowsSelect<T extends boolean = true> {
         stepName?: T;
         stepType?: T;
         assignedRole?: T;
+        assignedUser?: T;
         condition?: T;
         slaHours?: T;
         id?: T;

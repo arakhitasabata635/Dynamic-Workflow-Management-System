@@ -37,6 +37,11 @@ export const Workflows: CollectionConfig = {
           type: 'text',
         },
         {
+          name: 'assignedUser',
+          type: 'relationship',
+          relationTo: 'users',
+        },
+        {
           name: 'condition',
           type: 'text',
         },
