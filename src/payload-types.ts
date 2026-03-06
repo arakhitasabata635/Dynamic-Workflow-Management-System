@@ -69,7 +69,9 @@ export interface Config {
   collections: {
     users: User;
     blogs: Blog;
+    contracts: Contract;
     workflows: Workflow;
+    workflowLogs: WorkflowLog;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -79,7 +81,9 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     blogs: BlogsSelect<false> | BlogsSelect<true>;
+    contracts: ContractsSelect<false> | ContractsSelect<true>;
     workflows: WorkflowsSelect<false> | WorkflowsSelect<true>;
+    workflowLogs: WorkflowLogsSelect<false> | WorkflowLogsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -159,6 +163,18 @@ export interface Blog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contracts".
+ */
+export interface Contract {
+  id: number;
+  title: string;
+  amount: number;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "workflows".
  */
 export interface Workflow {
@@ -173,6 +189,23 @@ export interface Workflow {
     slaHours?: number | null;
     id?: string | null;
   }[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workflowLogs".
+ */
+export interface WorkflowLog {
+  id: number;
+  workflow?: (number | null) | Workflow;
+  documentId?: string | null;
+  collectionSlug?: string | null;
+  stepName?: string | null;
+  user?: (number | null) | User;
+  action?: string | null;
+  comment?: string | null;
+  timestamp?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -209,8 +242,16 @@ export interface PayloadLockedDocument {
         value: number | Blog;
       } | null)
     | ({
+        relationTo: 'contracts';
+        value: number | Contract;
+      } | null)
+    | ({
         relationTo: 'workflows';
         value: number | Workflow;
+      } | null)
+    | ({
+        relationTo: 'workflowLogs';
+        value: number | WorkflowLog;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -290,6 +331,17 @@ export interface BlogsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contracts_select".
+ */
+export interface ContractsSelect<T extends boolean = true> {
+  title?: T;
+  amount?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "workflows_select".
  */
 export interface WorkflowsSelect<T extends boolean = true> {
@@ -305,6 +357,22 @@ export interface WorkflowsSelect<T extends boolean = true> {
         slaHours?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "workflowLogs_select".
+ */
+export interface WorkflowLogsSelect<T extends boolean = true> {
+  workflow?: T;
+  documentId?: T;
+  collectionSlug?: T;
+  stepName?: T;
+  user?: T;
+  action?: T;
+  comment?: T;
+  timestamp?: T;
   updatedAt?: T;
   createdAt?: T;
 }

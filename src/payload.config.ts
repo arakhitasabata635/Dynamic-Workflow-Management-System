@@ -8,6 +8,8 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Blogs } from './collections/Blogs'
 import { Workflows } from './collections/Workflows'
+import { Contracts } from './collections/Contracts'
+import { WorkflowLogs } from './collections/WorkflowLogs'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -19,7 +21,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Blogs, Workflows],
+  collections: [Users, Blogs, Contracts, Workflows, WorkflowLogs],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
