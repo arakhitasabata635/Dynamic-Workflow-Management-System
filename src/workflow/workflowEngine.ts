@@ -1,17 +1,18 @@
 import payload from 'payload'
 import { logWorkflowAction } from './workflowLogger'
+import { evaluateCondition } from './conditionEvaluator'
 
 type WorkflowContentType = 'blogs' | 'contracts'
 
 export const runWorkflow = async ({
   collectionSlug,
-  documentId,
+  document,
 }: {
   collectionSlug: string
-  documentId: string
+  document: any
 }) => {
   try {
-    console.log('Running workflow for:', collectionSlug, documentId)
+    console.log('Running workflow for:', collectionSlug, document.documentId)
 
     // 1️⃣ Find workflow for this collection
     const workflows = await payload.find({
@@ -33,40 +34,61 @@ export const runWorkflow = async ({
     const logs = await payload.find({
       collection: 'workflowLogs',
       where: {
-        documentId: { equals: documentId },
+        documentId: { equals: document.documentId },
       },
       sort: '-createdAt',
     })
 
-    let nextStep
+    if (logs.docs[0].action === 'pending' || logs.docs[0].action === 'rejected') return
 
-    if (logs.docs.length === 0) {
-      // first step
-      nextStep = workflow.steps[0]
+    let nextIndex = 0
+    //check the log is present or not
+    if (logs.docs.length !== 0) {
+      const stepCompleted = logs.docs[0].stepName
+
+      for (const step of workflow.steps) {
+        if (step.stepName !== stepCompleted) {
+          nextIndex++
+          continue
+        }
+        if (!evaluateCondition(step.condition, document.amount)) {
+          nextIndex++
+          continue
+        }
+
+        nextIndex++
+        break
+      }
     } else {
-      const lastLog = logs.docs[0]
-
-      const currentIndex = workflow.steps.findIndex((s: any) => s.id === lastLog.id)
-
-      nextStep = workflow.steps[currentIndex + 1]
+      for (const step of workflow.steps) {
+        if (!evaluateCondition(step.condition, document.amount)) {
+          nextIndex++
+          continue
+        }
+        nextIndex++
+        break
+      }
     }
 
-    if (!nextStep) {
-      console.log('Workflow completed')
-      return
-    }
+    const nextStep = workflow.steps[nextIndex].stepName
+    const assignRole = workflow.steps[nextIndex].assignedRole
 
-    console.log('Next step:', nextStep.stepName)
+    console.log(`Step triggered: ${nextStep}`)
+    console.log(`Assigned Role: ${assignRole}`)
 
-    // log step trigger
+    // simulate email notification
+    console.log(`Notification sent to ${assignRole}`)
+
     await logWorkflowAction({
       workflowId: workflow.id,
-      documentId,
+      documentId: document.documentId,
       collectionSlug,
-      stepName: nextStep.stepName || '',
+      stepName: nextStep || '',
       action: 'step_triggered',
     })
   } catch (error) {
     console.error('Workflow engine error:', error)
   }
 }
+
+function checkStepIsComplited() {}

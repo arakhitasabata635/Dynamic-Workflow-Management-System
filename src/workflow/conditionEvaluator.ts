@@ -1,4 +1,7 @@
-export const evaluateCondition = (condition: string | null | undefined, document: any): boolean => {
+export const evaluateCondition = (
+  condition: string | null | undefined,
+  documentAmount: number,
+): boolean => {
   if (!condition || condition.trim() === '') {
     return true
   }
@@ -10,26 +13,25 @@ export const evaluateCondition = (condition: string | null | undefined, document
     return false
   }
 
-  const [field, operator, value] = parts
+  const [operator, value] = parts
 
-  const docValue = document[field]
   const numericValue = Number(value)
 
   switch (operator) {
     case '>':
-      return docValue > numericValue
+      return documentAmount > numericValue
 
     case '<':
-      return docValue < numericValue
+      return documentAmount < numericValue
 
     case '>=':
-      return docValue >= numericValue
+      return documentAmount >= numericValue
 
     case '<=':
-      return docValue <= numericValue
+      return documentAmount <= numericValue
 
     case '==':
-      return docValue == value
+      return documentAmount == numericValue
 
     default:
       return false

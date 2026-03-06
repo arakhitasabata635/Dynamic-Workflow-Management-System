@@ -33,7 +33,8 @@ export const WorkflowLogs: CollectionConfig = {
     },
     {
       name: 'action',
-      type: 'text',
+      type: 'select',
+      options: ['pending', 'approved', 'rejected', 'comment'],
     },
     {
       name: 'comment',
