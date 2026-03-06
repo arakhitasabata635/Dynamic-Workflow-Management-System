@@ -1,4 +1,4 @@
-export const evaluateCondition = (condition: string | undefined, document: any): boolean => {
+export const evaluateCondition = (condition: string | null | undefined, document: any): boolean => {
   if (!condition || condition.trim() === '') {
     return true
   }
