@@ -14,7 +14,7 @@ export const logWorkflowAction = async ({
   collectionSlug: string
   stepName: string
   userId?: number
-  action: string
+  action: 'comment' | 'pending' | 'approved' | 'rejected' | null | undefined
   comment?: string
 }) => {
   await payload.create({

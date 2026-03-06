@@ -1,3 +1,4 @@
+import { workflowHook } from '@/hooks/workflowHook'
 import { CollectionConfig } from 'payload'
 
 export const Blogs: CollectionConfig = {
@@ -5,6 +6,9 @@ export const Blogs: CollectionConfig = {
 
   admin: {
     useAsTitle: 'title',
+  },
+  hooks: {
+    afterChange: [workflowHook],
   },
 
   fields: [

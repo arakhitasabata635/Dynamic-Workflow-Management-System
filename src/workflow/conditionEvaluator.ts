@@ -8,7 +8,7 @@ export const evaluateCondition = (
 
   const parts = condition.split(' ')
 
-  if (parts.length !== 3) {
+  if (parts.length !== 2) {
     console.log('Invalid condition format:', condition)
     return false
   }
@@ -19,19 +19,19 @@ export const evaluateCondition = (
 
   switch (operator) {
     case '>':
-      return documentAmount > numericValue
+      return numericValue > documentAmount
 
     case '<':
-      return documentAmount < numericValue
+      return numericValue < documentAmount
 
     case '>=':
-      return documentAmount >= numericValue
+      return numericValue >= documentAmount
 
     case '<=':
-      return documentAmount <= numericValue
+      return numericValue <= documentAmount
 
     case '==':
-      return documentAmount == numericValue
+      return numericValue == documentAmount
 
     default:
       return false

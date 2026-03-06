@@ -204,7 +204,7 @@ export interface WorkflowLog {
   collectionSlug?: string | null;
   stepName?: string | null;
   user?: (number | null) | User;
-  action?: string | null;
+  action?: ('pending' | 'approved' | 'rejected' | 'comment') | null;
   comment?: string | null;
   timestamp?: string | null;
   updatedAt: string;
