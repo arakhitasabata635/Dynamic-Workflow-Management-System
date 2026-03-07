@@ -1,67 +1,407 @@
-# Payload Blank Template
+# Dynamic Workflow Management System – Payload CMS
 
-This template comes configured with the bare minimum to get started on anything you need.
+## Overview
 
-## Quick start
+This project implements a **Dynamic Workflow Management System** built with **Payload CMS v2, TypeScript, and PostgreSQL**.
+It allows administrators to create configurable workflows with multiple approval steps that can be attached dynamically to any collection.
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+The system supports document approval pipelines such as:
 
-## Quick Start - local setup
+- Blog publishing workflows
+- Contract approval workflows
+- Multi-stage document review processes
 
-To spin up this template locally, follow these steps:
+Each workflow contains multiple steps that can be assigned to **roles or specific users**, and the system automatically evaluates and triggers workflow progression when documents are created or updated.
 
-### Clone
+---
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+# Features
 
-### Development
+## Dynamic Workflow Engine
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+- Admins can create workflows from the admin UI.
+- Workflows support **unlimited steps**.
+- Each step includes:
+  - Step name
+  - Step type (approval / review / sign-off / comment-only)
+  - Assigned role or assigned user
+  - Optional condition
+  - SLA hours (optional)
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+Workflow execution is triggered automatically whenever a document is created or updated.
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+---
 
-#### Docker (Optional)
+## Supported Workflow Step Types
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+| Step Type    | Description                               |
+| ------------ | ----------------------------------------- |
+| approval     | Requires approval from assigned user/role |
+| review       | Review step before approval               |
+| sign-off     | Final confirmation step                   |
+| comment-only | Informational step allowing comments      |
 
-To do so, follow these steps:
+---
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+## Audit Trail System
 
-## How it works
+All workflow activities are stored in an immutable audit log collection.
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+Each log records:
 
-### Collections
+- Workflow ID
+- Document ID
+- Collection name
+- Step name
+- User performing the action
+- Action type (pending / approved / rejected / comment)
+- Timestamp
+- Optional comments
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+Logs cannot be edited or deleted.
 
-- #### Users (Authentication)
+---
 
-  Users are auth-enabled collections that have access to the admin panel.
+## Admin Workflow Panel
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+A workflow panel is injected into the document edit page in the admin UI.
 
-- #### Media
+This panel displays:
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+- Workflow progress
+- Step history
+- User actions
+- Approval status
 
-### Docker
+Admins and reviewers can see the workflow state directly inside the document editor.
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+---
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+## REST APIs
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+Two custom API endpoints are provided.
 
-## Questions
+### Trigger Workflow
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+POST
+
+```
+/api/workflows/trigger
+```
+
+Body example:
+
+```
+{
+  "collectionSlug": "contracts",
+  "documentId": "1"
+}
+```
+
+This endpoint manually triggers workflow evaluation.
+
+---
+
+### Get Workflow Status
+
+GET
+
+```
+/api/workflows/status/:docId
+```
+
+Example:
+
+```
+/api/workflows/status/1
+```
+
+Returns the workflow logs for a document.
+
+---
+
+# Project Architecture
+
+## Folder Structure
+
+```
+src
+│
+├── collections
+│   ├── Blogs.ts
+│   ├── Contracts.ts
+│   ├── Workflows.ts
+│   └── WorkflowLogs.ts
+│
+├── workflow
+│   ├── workflowEngine.ts
+│   ├── workflowHook.ts
+│   ├── conditionEvaluator.ts
+│   └── logWorkflowAction.ts
+│
+├── components
+│   └── WorkflowPanel.tsx
+│
+└── payload.config.ts
+```
+
+---
+
+## Core Components
+
+### Workflow Engine
+
+`workflowEngine.ts`
+
+Responsible for:
+
+- Finding workflow configuration
+- Evaluating conditions
+- Determining the next workflow step
+- Logging workflow events
+- Triggering notifications
+
+---
+
+### Workflow Hook
+
+`workflowHook.ts`
+
+Runs automatically whenever documents are created or updated.
+
+This hook triggers the workflow engine and determines whether the workflow should move to the next step.
+
+---
+
+### Condition Evaluator
+
+`conditionEvaluator.ts`
+
+Evaluates workflow conditions such as:
+
+```
+> 10000
+< 5000
+>= 2000
+```
+
+These conditions determine whether a workflow step should be triggered.
+
+---
+
+### Workflow Logs
+
+`WorkflowLogs.ts`
+
+Stores immutable logs for:
+
+- workflow progress
+- approvals
+- comments
+- rejections
+
+---
+
+# Sample Workflows
+
+## Blog Publishing Workflow
+
+Step 1
+Review by Editor
+
+Step 2
+Approval by Admin
+
+Step 3
+Final Sign-off
+
+---
+
+## Contract Approval Workflow
+
+Step 1
+Legal Review
+
+Condition
+
+```
+> 5000
+```
+
+Step 2
+Manager Approval
+
+Step 3
+CEO Sign-off
+
+---
+
+# Setup Instructions
+
+## Prerequisites
+
+- Node.js 18+
+- PostgreSQL database (Neon DB supported)
+
+---
+
+## Installation
+
+Clone the repository
+
+```
+git clone <private-repo-url>
+```
+
+Navigate to project
+
+```
+cd workflow-payload-project
+```
+
+Install dependencies
+
+```
+npm install
+```
+
+---
+
+## Environment Variables
+
+Create `.env` file
+
+```
+PAYLOAD_SECRET=your_secret_key
+DATABASE_URL=your_neon_database_url
+```
+
+---
+
+## Run Development Server
+
+```
+npm run dev
+```
+
+Payload admin will start at
+
+```
+http://localhost:3000/admin
+```
+
+---
+
+# Seed Data
+
+The project includes example collections:
+
+- Blog
+- Contract
+
+Create documents from the admin panel to test workflow execution.
+
+---
+
+# Demo Credentials
+
+Admin User
+
+```
+email: admin@example.com
+password: admin123
+```
+
+Reviewer User
+
+```
+email: reviewer@example.com
+password: reviewer123
+```
+
+These users can be created in the admin interface.
+
+---
+
+# Deployment Guide
+
+## Deploy to Vercel
+
+Install Vercel CLI
+
+```
+npm install -g vercel
+```
+
+Deploy
+
+```
+vercel
+```
+
+Add environment variables in the Vercel dashboard:
+
+```
+PAYLOAD_SECRET
+DATABASE_URL
+```
+
+Once deployed, access the admin panel at:
+
+```
+https://your-vercel-domain/admin
+```
+
+---
+
+# Technical Challenges
+
+## Dynamic Workflow Execution
+
+The biggest challenge was building a workflow engine that dynamically supports multiple collections without hardcoding collection names.
+
+This was solved by:
+
+- Using collectionSlug mapping
+- Fetching workflow definitions dynamically
+- Executing workflows through reusable hooks
+
+---
+
+## Workflow Logging
+
+Ensuring logs were immutable was important for maintaining a reliable audit trail.
+
+This was implemented by restricting update and delete access on the workflowLogs collection.
+
+---
+
+# Bonus Features
+
+Implemented features beyond the core requirements:
+
+- SLA field for workflow steps
+- Condition evaluation system
+- Dynamic workflow assignment
+- Workflow progress panel in admin UI
+
+---
+
+# Loom Walkthrough
+
+A Loom walkthrough video is included with the submission demonstrating:
+
+- System architecture
+- Workflow creation
+- Approval process
+- API usage
+- Admin UI workflow panel
+- Deployment demonstration
+
+---
+
+# Author
+
+Backend Developer Assignment Submission
+
+Payload CMS Dynamic Workflow System
