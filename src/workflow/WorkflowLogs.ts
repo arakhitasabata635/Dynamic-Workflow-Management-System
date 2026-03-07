@@ -1,6 +1,7 @@
 import payload from 'payload'
 
 export const logWorkflowAction = async ({
+  payload,
   workflowId,
   documentId,
   collectionSlug,
@@ -9,6 +10,7 @@ export const logWorkflowAction = async ({
   action,
   comment,
 }: {
+  payload: any
   workflowId: number
   documentId: string
   collectionSlug: string

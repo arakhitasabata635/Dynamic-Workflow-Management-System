@@ -1,5 +1,5 @@
 import payload from 'payload'
-import { logWorkflowAction } from './workflowLogger'
+import { logWorkflowAction } from './WorkflowLogs'
 import { evaluateCondition } from './conditionEvaluator'
 
 export const runWorkflow = async ({ payload, collectionSlug, document }: any) => {
@@ -77,6 +77,7 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
       console.log(`Notification sent to ${assignRole}`)
 
       await logWorkflowAction({
+        payload: payload,
         workflowId: workflow.id,
         documentId: document.id,
         collectionSlug,
