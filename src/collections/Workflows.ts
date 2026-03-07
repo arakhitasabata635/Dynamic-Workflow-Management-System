@@ -65,6 +65,7 @@ export const Workflows: CollectionConfig = {
             },
           },
           sort: '-timestamp',
+          depth: 0,
         })
 
         return Response.json({
