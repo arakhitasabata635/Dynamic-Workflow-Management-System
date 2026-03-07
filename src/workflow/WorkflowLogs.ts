@@ -1,5 +1,3 @@
-import payload from 'payload'
-
 export const logWorkflowAction = async ({
   payload,
   workflowId,

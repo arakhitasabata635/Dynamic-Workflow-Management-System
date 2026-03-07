@@ -19,19 +19,19 @@ export const evaluateCondition = (
 
   switch (operator) {
     case '>':
-      return numericValue > documentAmount
+      return documentAmount > numericValue
 
     case '<':
-      return numericValue < documentAmount
+      return documentAmount < numericValue
 
     case '>=':
-      return numericValue >= documentAmount
+      return documentAmount >= numericValue
 
     case '<=':
-      return numericValue <= documentAmount
+      return documentAmount <= numericValue
 
-    case '==':
-      return numericValue == documentAmount
+    case '=':
+      return documentAmount == numericValue
 
     default:
       return false

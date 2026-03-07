@@ -1,4 +1,3 @@
-import payload from 'payload'
 import { logWorkflowAction } from './WorkflowLogs'
 import { evaluateCondition } from './conditionEvaluator'
 
@@ -29,10 +28,10 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
       where: {
         documentId: { equals: document.id },
       },
-      sort: '-createdAt',
+      sort: '-timestamp',
     })
     console.log(logs.docs)
-    // if (logs.docs[0].action === 'pending' || logs.docs[0].action === 'rejected') return
+    if (logs.docs[0]?.action === 'pending' || logs.docs[0]?.action === 'rejected') return
 
     //find the new step index
     let nextIndex = 0
@@ -64,7 +63,14 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
     console.log(nextIndex)
 
     // is next step is present or not
-    const nextStep = workflow.steps[nextIndex].stepName
+    const nextStepObj = workflow.steps[nextIndex]
+
+    if (!nextStepObj) {
+      console.log('Workflow finished')
+      return
+    }
+
+    const nextStep = nextStepObj.stepName
 
     console.log('nextStep', nextStep)
     if (nextStep) {

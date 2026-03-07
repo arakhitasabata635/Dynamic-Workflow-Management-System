@@ -200,13 +200,13 @@ export interface Workflow {
 export interface WorkflowLog {
   id: number;
   workflow?: (number | null) | Workflow;
-  documentId?: string | null;
-  collectionSlug?: string | null;
-  stepName?: string | null;
-  user?: (number | null) | User;
-  action?: ('pending' | 'approved' | 'rejected' | 'comment') | null;
-  comment?: string | null;
-  timestamp?: string | null;
+  documentId: string;
+  collectionSlug: string;
+  stepName: string;
+  user: number | User;
+  action: 'pending' | 'approved' | 'rejected' | 'comment';
+  comment: string;
+  timestamp: string;
   updatedAt: string;
   createdAt: string;
 }
