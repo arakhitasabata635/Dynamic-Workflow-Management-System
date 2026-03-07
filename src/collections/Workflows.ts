@@ -1,3 +1,4 @@
+import { runWorkflow } from '@/workflow/workflowEngine'
 import { CollectionConfig } from 'payload'
 
 export const Workflows: CollectionConfig = {
@@ -12,6 +13,67 @@ export const Workflows: CollectionConfig = {
     update: () => true,
     delete: () => true,
   },
+
+  endpoints: [
+    {
+      path: '/trigger',
+      method: 'post',
+      handler: async (req) => {
+        const payload = req.payload
+
+        const { collectionSlug, documentId } = await req.json!()
+
+        if (!collectionSlug || !documentId) {
+          return Response.json({ error: 'collectionSlug and documentId required' }, { status: 400 })
+        }
+
+        const doc = await payload.findByID({
+          collection: collectionSlug,
+          id: documentId,
+        })
+
+        if (!doc) {
+          return Response.json({ error: 'Document not found' }, { status: 404 })
+        }
+
+        await runWorkflow({
+          payload,
+          collectionSlug,
+          document: doc,
+        })
+
+        return Response.json({ message: 'Workflow triggered' })
+      },
+    },
+    {
+      path: '/status/:docId',
+      method: 'get',
+      handler: async (req) => {
+        const payload = req.payload
+
+        const docId = req.routeParams?.docId
+
+        if (!docId) {
+          return Response.json({ error: 'Document ID is required' }, { status: 400 })
+        }
+
+        const logs = await payload.find({
+          collection: 'workflowLogs',
+          where: {
+            documentId: {
+              equals: docId,
+            },
+          },
+          sort: '-timestamp',
+        })
+
+        return Response.json({
+          success: true,
+          logs: logs.docs,
+        })
+      },
+    },
+  ],
 
   fields: [
     {
@@ -32,15 +94,18 @@ export const Workflows: CollectionConfig = {
         {
           name: 'stepName',
           type: 'text',
+          required: true,
         },
         {
           name: 'stepType',
           type: 'select',
           options: ['approval', 'review', 'sign-off', 'comment-only'],
+          required: true,
         },
         {
           name: 'assignedRole',
           type: 'text',
+          required: true,
         },
         {
           name: 'assignedUser',
@@ -50,6 +115,7 @@ export const Workflows: CollectionConfig = {
         {
           name: 'condition',
           type: 'text',
+          required: true,
         },
         {
           name: 'slaHours',
