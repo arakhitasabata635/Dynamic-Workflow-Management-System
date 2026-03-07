@@ -16,7 +16,7 @@ export const WorkflowLogs: CollectionConfig = {
     },
     {
       name: 'documentId',
-      type: 'text',
+      type: 'number',
       required: true,
     },
     {
@@ -33,19 +33,17 @@ export const WorkflowLogs: CollectionConfig = {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
-      required: true,
     },
     {
       name: 'action',
       type: 'select',
       options: ['pending', 'approved', 'rejected', 'comment'],
       required: true,
-      defaultValue: ' pending',
+      defaultValue: 'pending',
     },
     {
       name: 'comment',
       type: 'textarea',
-      required: true,
     },
     {
       name: 'timestamp',

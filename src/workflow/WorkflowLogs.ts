@@ -26,7 +26,7 @@ export const logWorkflowAction = async ({
       stepName,
       user: userId,
       action,
-      comment,
+      comment: comment || '',
     },
   })
 }

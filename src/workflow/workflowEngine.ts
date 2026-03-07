@@ -16,7 +16,6 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
     })
 
     const workflow = workflows.docs[0]
-    console.log(workflow)
     if (!workflow) {
       console.log('No workflow configured for this collection')
       return
@@ -30,7 +29,7 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
       },
       sort: '-timestamp',
     })
-    console.log(logs.docs)
+    console.log('logs', typeof document.id)
     if (logs.docs[0]?.action === 'pending' || logs.docs[0]?.action === 'rejected') return
 
     //find the new step index

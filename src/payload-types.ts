@@ -182,11 +182,11 @@ export interface Workflow {
   name: string;
   collectionSlug: string;
   steps: {
-    stepName?: string | null;
-    stepType?: ('approval' | 'review' | 'sign-off' | 'comment-only') | null;
-    assignedRole?: string | null;
+    stepName: string;
+    stepType: 'approval' | 'review' | 'sign-off' | 'comment-only';
+    assignedRole: string;
     assignedUser?: (number | null) | User;
-    condition?: string | null;
+    condition: string;
     slaHours?: number | null;
     id?: string | null;
   }[];
@@ -200,12 +200,12 @@ export interface Workflow {
 export interface WorkflowLog {
   id: number;
   workflow?: (number | null) | Workflow;
-  documentId: string;
+  documentId: number;
   collectionSlug: string;
   stepName: string;
-  user: number | User;
+  user?: (number | null) | User;
   action: 'pending' | 'approved' | 'rejected' | 'comment';
-  comment: string;
+  comment?: string | null;
   timestamp: string;
   updatedAt: string;
   createdAt: string;
