@@ -13,10 +13,6 @@ export const WorkflowLogs: CollectionConfig = {
       name: 'workflow',
       type: 'relationship',
       relationTo: 'workflows',
-    },
-    {
-      name: 'documentId',
-      type: 'number',
       required: true,
     },
     {
@@ -25,14 +21,28 @@ export const WorkflowLogs: CollectionConfig = {
       required: true,
     },
     {
+      name: 'documentId',
+      type: 'number',
+      required: true,
+    },
+    {
       name: 'stepName',
       type: 'text',
+      required: true,
+    },
+    {
+      name: 'stepOrder',
+      type: 'number',
       required: true,
     },
     {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
+    },
+    {
+      name: 'role',
+      type: 'text',
     },
     {
       name: 'action',

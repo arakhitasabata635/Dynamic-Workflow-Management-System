@@ -84,7 +84,7 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
       await logWorkflowAction({
         payload: payload,
         workflowId: workflow.id,
-        documentId: document.id,
+        documentId: String(document.id),
         collectionSlug,
         stepName: nextStep || '',
         action: 'pending',
