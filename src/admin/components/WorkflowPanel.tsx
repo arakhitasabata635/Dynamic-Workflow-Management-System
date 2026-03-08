@@ -1,37 +1,86 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { useDocumentInfo } from '@payloadcms/ui'
+import { useDocumentInfo, useAuth } from '@payloadcms/ui'
 
 const WorkflowPanel: React.FC = () => {
   const { id, collectionSlug } = useDocumentInfo()
-  console.log('this page is created and updated')
-  const [logs, setLogs] = useState<any[]>([])
+  const { user } = useAuth()
 
-  useEffect(() => {
+  const [workflow, setWorkflow] = useState<any>(null)
+
+  const fetchStatus = async () => {
     if (!id) return
 
-    const fetchStatus = async () => {
-      const res = await fetch(`/api/workflows/status/${id}`)
-      const data = await res.json()
+    const res = await fetch(`/api/workflows/status/${id}`)
+    const data = await res.json()
 
-      setLogs(data.logs || [])
-    }
+    setWorkflow(data)
+  }
 
+  useEffect(() => {
     fetchStatus()
   }, [id])
 
+  const handleAction = async (action: string) => {
+    const comment = prompt('Optional comment')
+
+    await fetch('/api/workflows/action', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        documentId: id,
+        collectionSlug,
+        action,
+        comment,
+      }),
+    })
+
+    await fetchStatus()
+  }
+
+  if (!workflow) return null
+  console.log(workflow)
+
   return (
-    <div style={{ padding: '20px', borderTop: '1px solid #ddd' }}>
+    <div style={{ padding: 20, borderTop: '1px solid #ddd' }}>
       <h3>Workflow Status</h3>
 
-      {logs.length === 0 && <p>No workflow logs yet.</p>}
+      <p>
+        <strong>Current Step:</strong> {workflow.stepName}
+      </p>
 
-      {logs.map((log) => (
-        <div key={log.id} style={{ marginBottom: '10px' }}>
+      <h4>Steps</h4>
+
+      {workflow.steps?.map((step: any, index: number) => (
+        <div key={index} style={{ marginBottom: 10 }}>
+          <strong>{step.name}</strong> — {step.status} ({step.role})
+        </div>
+      ))}
+
+      <h4>Logs</h4>
+
+      {workflow.logs?.map((log: any) => (
+        <div key={log.id} style={{ marginBottom: 10 }}>
           <strong>{log.stepName}</strong> — {log.action}
+          {log.user && <span> by {log.user.email}</span>}
           {log.comment && <p>Comment: {log.comment}</p>}
         </div>
       ))}
+
+      <h4>Actions</h4>
+      {}
+
+      <button onClick={() => handleAction('approved')}>Approve</button>
+
+      <button onClick={() => handleAction('rejected')} style={{ marginLeft: 10 }}>
+        Reject
+      </button>
+
+      <button onClick={() => handleAction('comment')} style={{ marginLeft: 10 }}>
+        Comment
+      </button>
     </div>
   )
 }

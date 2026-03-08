@@ -52,6 +52,7 @@ export const Workflows: CollectionConfig = {
           },
           sort: '-timestamp',
           limit: 1,
+          depth: 0,
         })
 
         const currentStep = logs.docs[0]
