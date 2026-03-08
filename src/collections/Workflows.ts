@@ -1,5 +1,8 @@
+import { User } from '@/payload-types'
 import { runWorkflow } from '@/workflow/workflowEngine'
 import { CollectionConfig } from 'payload'
+
+type UserRole = 'admin' | 'reviewer' | 'manager'
 
 export const Workflows: CollectionConfig = {
   slug: 'workflows',
@@ -15,6 +18,81 @@ export const Workflows: CollectionConfig = {
   },
 
   endpoints: [
+    {
+      path: '/action',
+      method: 'post',
+      handler: async (req) => {
+        const payload = req.payload
+
+        const { documentId, collectionSlug, action, comment } = await req.json!()
+
+        if (!documentId || !collectionSlug || !action) {
+          return Response.json(
+            { error: 'documentId, collectionSlug and action required' },
+            { status: 400 },
+          )
+        }
+
+        // find latest pending step
+        const logs = await payload.find({
+          collection: 'workflowLogs',
+          where: {
+            and: [
+              {
+                documentId: {
+                  equals: String(documentId),
+                },
+              },
+              {
+                action: {
+                  equals: 'pending',
+                },
+              },
+            ],
+          },
+          sort: '-timestamp',
+          limit: 1,
+        })
+
+        const currentStep = logs.docs[0]
+
+        if (!currentStep) {
+          return Response.json({ error: 'No pending step found' }, { status: 404 })
+        }
+
+        // update log entry
+        await payload.update({
+          collection: 'workflowLogs',
+          id: currentStep.id,
+          data: {
+            action,
+            comment: comment || '',
+            user: req.user?.id,
+            role: req.user?.role,
+          },
+        })
+
+        // get document again
+        const doc = await payload.findByID({
+          collection: collectionSlug,
+          id: documentId,
+        })
+
+        // run workflow again to move next step
+        const { runWorkflow } = await import('@/workflow/workflowEngine')
+
+        await runWorkflow({
+          payload,
+          collectionSlug,
+          document: doc,
+        })
+
+        return Response.json({
+          success: true,
+          message: `Step ${action}`,
+        })
+      },
+    },
     {
       path: '/trigger',
       method: 'post',
