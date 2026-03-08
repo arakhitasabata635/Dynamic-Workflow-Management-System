@@ -60,6 +60,7 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
       documentId: String(document.id),
       collectionSlug,
       stepName: nextStepObj.stepName,
+      role: nextStepObj.assignedRole,
       stepOrder: nextIndex,
       action: 'pending',
     })
