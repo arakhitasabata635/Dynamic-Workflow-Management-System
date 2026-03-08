@@ -154,7 +154,7 @@ export const Workflows: CollectionConfig = {
           return Response.json({ error: 'Document ID is required' }, { status: 400 })
         }
 
-        const logs = await payload.find({
+        let logs = await payload.find({
           collection: 'workflowLogs',
           where: {
             documentId: {
@@ -162,7 +162,6 @@ export const Workflows: CollectionConfig = {
             },
           },
           sort: '-timestamp',
-          depth: 0,
         })
 
         return Response.json({

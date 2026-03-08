@@ -6,7 +6,7 @@ const WorkflowPanel: React.FC = () => {
   const { id, collectionSlug } = useDocumentInfo()
   const { user } = useAuth()
 
-  const [workflow, setWorkflow] = useState<any>(null)
+  const [logs, setLogs] = useState<any>(null)
 
   const fetchStatus = async () => {
     if (!id) return
@@ -14,7 +14,7 @@ const WorkflowPanel: React.FC = () => {
     const res = await fetch(`/api/workflows/status/${id}`)
     const data = await res.json()
 
-    setWorkflow(data)
+    setLogs(data.logs[0])
   }
 
   useEffect(() => {
@@ -40,47 +40,65 @@ const WorkflowPanel: React.FC = () => {
     await fetchStatus()
   }
 
-  if (!workflow) return null
-  console.log(workflow)
+  if (!logs) return null
+  console.log(logs)
 
   return (
-    <div style={{ padding: 20, borderTop: '1px solid #ddd' }}>
-      <h3>Workflow Status</h3>
+    <div style={{ padding: 20, borderTop: '1px solid #221d1d' }}>
+      <h3>Workflow Progress</h3>
 
       <p>
-        <strong>Current Step:</strong> {workflow.stepName}
+        <strong>Current Step:</strong> {logs.stepName}
       </p>
 
       <h4>Steps</h4>
 
-      {workflow.steps?.map((step: any, index: number) => (
-        <div key={index} style={{ marginBottom: 10 }}>
-          <strong>{step.name}</strong> — {step.status} ({step.role})
-        </div>
-      ))}
+      {logs?.workflow?.steps?.map((step: any, index: number) => {
+        const isCurrent = logs.stepName === step.stepName
 
-      <h4>Logs</h4>
+        return (
+          <div
+            key={step.id}
+            style={{
+              border: '1px solid #eee',
+              padding: 12,
+              marginBottom: 10,
+              borderRadius: 6,
+              background: isCurrent ? '#4b4949' : '#161212',
+            }}
+          >
+            <strong>{step.stepName}</strong>
 
-      {workflow.logs?.map((log: any) => (
-        <div key={log.id} style={{ marginBottom: 10 }}>
-          <strong>{log.stepName}</strong> — {log.action}
-          {log.user && <span> by {log.user.email}</span>}
-          {log.comment && <p>Comment: {log.comment}</p>}
-        </div>
-      ))}
+            <div>Role: {step.assignedRole}</div>
 
-      <h4>Actions</h4>
-      {}
+            {isCurrent && (
+              <>
+                <div>Status: {logs.action}</div>
 
-      <button onClick={() => handleAction('approved')}>Approve</button>
+                <div>Time: {new Date(logs.timestamp).toLocaleString()}</div>
 
-      <button onClick={() => handleAction('rejected')} style={{ marginLeft: 10 }}>
-        Reject
-      </button>
+                {logs.user && <div>User: {logs.user.email}</div>}
 
-      <button onClick={() => handleAction('comment')} style={{ marginLeft: 10 }}>
-        Comment
-      </button>
+                {logs.comment && <div>Comment: {logs.comment}</div>}
+              </>
+            )}
+
+            {user?.role === step.assignedRole && isCurrent && (
+              <div style={{ marginTop: 10 }}>
+                <button onClick={() => handleAction('approved')}>Approve</button>
+
+                <button onClick={() => handleAction('rejected')} style={{ marginLeft: 10 }}>
+                  Reject
+                </button>
+
+                <button onClick={() => handleAction('comment')} style={{ marginLeft: 10 }}>
+                  Comment
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
