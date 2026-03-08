@@ -29,69 +29,54 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
       },
       sort: '-timestamp',
     })
-    console.log('logs', typeof document.id)
-    if (logs.docs[0]?.action === 'pending' || logs.docs[0]?.action === 'rejected') return
+
+    if (
+      logs.docs[0]?.action === 'pending' ||
+      logs.docs[0]?.action === 'rejected' ||
+      logs.docs[0]?.action === 'comment'
+    )
+      return
 
     //find the new step index
-    let nextIndex = 0
+    let nextIndex = logs.docs[0].stepOrder || 0
 
-    if (logs.docs.length !== 0) {
-      const stepCompleted = logs.docs[0].stepName
+    // skip steps if condition fails
+    while (nextIndex < workflow.steps.length) {
+      const step = workflow.steps[nextIndex]
 
-      for (const step of workflow.steps) {
-        if (step.stepName !== stepCompleted) {
-          nextIndex++
-          continue
-        }
-        if (!evaluateCondition(step.condition, document)) {
-          nextIndex++
-          continue
-        }
+      const conditionValid = evaluateCondition(step.condition, document)
+
+      if (conditionValid) {
         break
       }
-    } else {
-      for (const step of workflow.steps) {
-        console.log('step', !evaluateCondition(step.condition, document.amount))
-        if (!evaluateCondition(step.condition, document.amount)) {
-          nextIndex++
-          continue
-        }
-        break
-      }
+
+      nextIndex++
     }
+
     console.log(nextIndex)
 
-    // is next step is present or not
+    // if step completed
     const nextStepObj = workflow.steps[nextIndex]
-
     if (!nextStepObj) {
-      console.log('Workflow finished')
+      console.log('Workflow completed for document:', document.id)
       return
     }
 
-    const nextStep = nextStepObj.stepName
+    //if step present
+    console.log(`Step triggered: ${nextStepObj.stepName}`)
 
-    console.log('nextStep', nextStep)
-    if (nextStep) {
-      const assignRole = workflow.steps[nextIndex].assignedRole
+    // simulate email notification
+    console.log(`Notification sent to assigned user or role`)
 
-      console.log(`Step triggered: ${nextStep}`)
-      console.log(`Assigned Role: ${assignRole}`)
-
-      // simulate email notification
-      console.log(`Notification sent to ${assignRole}`)
-
-      await logWorkflowAction({
-        payload: payload,
-        workflowId: workflow.id,
-        documentId: String(document.id),
-        collectionSlug,
-        stepName: nextStep || '',
-        action: 'pending',
-      })
-    } else {
-      console.log('all are approved')
-    }
+    await logWorkflowAction({
+      payload,
+      workflowId: workflow.id,
+      documentId: String(document.id),
+      collectionSlug,
+      stepName: nextStepObj.stepName,
+      stepOrder: nextIndex,
+      action: 'pending',
+    })
   } catch (error) {
     console.error('Workflow engine error:', error)
   }
