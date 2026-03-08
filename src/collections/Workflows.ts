@@ -60,6 +60,24 @@ export const Workflows: CollectionConfig = {
           return Response.json({ error: 'No pending step found' }, { status: 404 })
         }
 
+        // get workflow to check assigned role
+        const workflow = await payload.findByID({
+          collection: 'workflows',
+          id: currentStep.workflow as number,
+        })
+
+        const step = workflow.steps[currentStep.stepOrder]
+
+        const assignedRole = step?.assignedRole
+        const assignedUser = step?.assignedUser
+
+        // check role permission
+        if (assignedRole && req.user?.role !== assignedRole && req.user?.id !== assignedUser) {
+          return Response.json(
+            { error: 'You are not allowed to approve this step' },
+            { status: 403 },
+          )
+        }
         // update log entry
         await payload.update({
           collection: 'workflowLogs',
