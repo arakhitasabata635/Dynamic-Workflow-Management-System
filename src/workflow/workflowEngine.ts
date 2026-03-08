@@ -43,7 +43,7 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
           nextIndex++
           continue
         }
-        if (!evaluateCondition(step.condition, document.amount)) {
+        if (!evaluateCondition(step.condition, document)) {
           nextIndex++
           continue
         }
