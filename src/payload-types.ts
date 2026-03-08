@@ -199,11 +199,13 @@ export interface Workflow {
  */
 export interface WorkflowLog {
   id: number;
-  workflow?: (number | null) | Workflow;
-  documentId: number;
+  workflow: number | Workflow;
   collectionSlug: string;
+  documentId: string;
   stepName: string;
+  stepOrder: number;
   user?: (number | null) | User;
+  role?: string | null;
   action: 'pending' | 'approved' | 'rejected' | 'comment';
   comment?: string | null;
   timestamp: string;
@@ -368,10 +370,12 @@ export interface WorkflowsSelect<T extends boolean = true> {
  */
 export interface WorkflowLogsSelect<T extends boolean = true> {
   workflow?: T;
-  documentId?: T;
   collectionSlug?: T;
+  documentId?: T;
   stepName?: T;
+  stepOrder?: T;
   user?: T;
+  role?: T;
   action?: T;
   comment?: T;
   timestamp?: T;

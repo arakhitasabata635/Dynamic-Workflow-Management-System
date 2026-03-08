@@ -38,25 +38,11 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
       return
 
     //find the new step index
-    let nextIndex = logs.docs[0].stepOrder || 0
-
-    // skip steps if condition fails
-    while (nextIndex < workflow.steps.length) {
-      const step = workflow.steps[nextIndex]
-
-      const conditionValid = evaluateCondition(step.condition, document)
-
-      if (conditionValid) {
-        break
-      }
-
-      nextIndex++
-    }
-
-    console.log(nextIndex)
+    let nextIndex = calculateNextIndex(logs, workflow, document)
 
     // if step completed
     const nextStepObj = workflow.steps[nextIndex]
+    console.log('nextIndex', nextIndex)
     if (!nextStepObj) {
       console.log('Workflow completed for document:', document.id)
       return
@@ -80,4 +66,24 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
   } catch (error) {
     console.error('Workflow engine error:', error)
   }
+}
+
+function calculateNextIndex(logs: any, workflow: any, document: any): number {
+  // find approved steps
+  let nextIndex = logs.docs[0]?.stepOrder || 0
+
+  // skip steps if condition fails
+  while (nextIndex < workflow.steps.length) {
+    const step = workflow.steps[nextIndex]
+
+    const conditionValid = evaluateCondition(step.condition, document)
+
+    if (conditionValid) {
+      break
+    }
+
+    nextIndex++
+  }
+  console.log('nextIndex', nextIndex)
+  return nextIndex
 }

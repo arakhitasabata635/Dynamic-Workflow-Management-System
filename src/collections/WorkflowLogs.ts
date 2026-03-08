@@ -4,7 +4,7 @@ export const WorkflowLogs: CollectionConfig = {
   slug: 'workflowLogs',
 
   access: {
-    update: () => false,
+    update: () => true,
     delete: () => false,
   },
 
@@ -22,7 +22,7 @@ export const WorkflowLogs: CollectionConfig = {
     },
     {
       name: 'documentId',
-      type: 'number',
+      type: 'text',
       required: true,
     },
     {
