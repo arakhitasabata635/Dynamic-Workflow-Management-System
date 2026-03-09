@@ -40,8 +40,7 @@ const WorkflowPanel: React.FC = () => {
     await fetchStatus()
   }
 
-  if (!logs) return null
-  console.log(logs)
+  if (!logs) return <div>Loading workflow...</div>
 
   return (
     <div style={{ padding: 20, borderTop: '1px solid #221d1d' }}>
