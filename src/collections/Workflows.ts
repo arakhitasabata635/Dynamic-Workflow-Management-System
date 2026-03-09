@@ -1,8 +1,5 @@
-import { User } from '@/payload-types'
 import { runWorkflow } from '@/workflow/workflowEngine'
 import { CollectionConfig } from 'payload'
-
-type UserRole = 'admin' | 'reviewer' | 'manager'
 
 export const Workflows: CollectionConfig = {
   slug: 'workflows',
@@ -154,7 +151,7 @@ export const Workflows: CollectionConfig = {
           return Response.json({ error: 'Document ID is required' }, { status: 400 })
         }
 
-        let logs = await payload.find({
+        const logs = await payload.find({
           collection: 'workflowLogs',
           where: {
             documentId: {

@@ -38,7 +38,7 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
       return
 
     //find the new step index
-    let nextIndex = calculateNextIndex(logs, workflow, document)
+    const nextIndex = calculateNextIndex(logs, workflow, document)
 
     // if step completed
     const nextStepObj = workflow.steps[nextIndex]
@@ -71,7 +71,7 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
 
 function calculateNextIndex(logs: any, workflow: any, document: any): number {
   // find approved steps
-  let nextIndex = logs.docs[0]?.stepOrder || 0
+  let nextIndex: number = logs.docs[0]?.stepOrder || 0
 
   // skip steps if condition fails
   while (nextIndex < workflow.steps.length) {
