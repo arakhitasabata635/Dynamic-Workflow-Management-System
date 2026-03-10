@@ -5,7 +5,7 @@ import { useDocumentInfo, useAuth } from '@payloadcms/ui'
 const WorkflowPanel: React.FC = () => {
   const { id, collectionSlug } = useDocumentInfo()
   const { user } = useAuth()
-
+  console.log(id, collectionSlug)
   const [logs, setLogs] = useState<any>(null)
 
   const fetchStatus = async () => {
@@ -40,15 +40,11 @@ const WorkflowPanel: React.FC = () => {
     await fetchStatus()
   }
 
-  if (!logs) return <div>Loading workflow...</div>
+  if (!logs) return null
 
   return (
     <div style={{ padding: 20, borderTop: '1px solid #221d1d' }}>
       <h3>Workflow Progress</h3>
-
-      <p>
-        <strong>Current Step:</strong> {logs.stepName}
-      </p>
 
       <h4>Steps</h4>
 

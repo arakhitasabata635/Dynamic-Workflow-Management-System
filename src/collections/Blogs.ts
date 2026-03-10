@@ -3,12 +3,9 @@ import { CollectionConfig } from 'payload'
 
 export const Blogs: CollectionConfig = {
   slug: 'blogs',
-
+  access: {},
   admin: {
     useAsTitle: 'title',
-    components: {
-     afterList: ['@/admin/components/WorkflowPanel']
-    },
   },
   hooks: {
     afterChange: [workflowHook],
@@ -27,6 +24,15 @@ export const Blogs: CollectionConfig = {
     {
       name: 'amount',
       type: 'number',
+    },
+    {
+      name: 'workflowStatus',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/admin/components/WorkflowPanel',
+        },
+      },
     },
   ],
 }

@@ -26,5 +26,14 @@ export const Contracts: CollectionConfig = {
       type: 'number',
       required: true,
     },
+    {
+      name: 'workflowStatus',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/admin/components/WorkflowPanel',
+        },
+      },
+    },
   ],
 }
