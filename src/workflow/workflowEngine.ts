@@ -70,8 +70,9 @@ export const runWorkflow = async ({ payload, collectionSlug, document }: any) =>
 }
 
 function calculateNextIndex(logs: any, workflow: any, document: any): number {
+  console.log(logs.docs[0]?.stepOrder)
   // find approved steps
-  let nextIndex: number = logs.docs[0]?.stepOrder || 0
+  let nextIndex: number = logs.docs[0]?.stepOrder + 1 || 0
 
   // skip steps if condition fails
   while (nextIndex < workflow.steps.length) {

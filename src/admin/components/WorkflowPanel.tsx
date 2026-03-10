@@ -78,7 +78,7 @@ const WorkflowPanel: React.FC = () => {
 
             {step.comment && <div>Comment: {logs.comment}</div>}
 
-            {user?.role === step.role && (
+            {user?.role === step.role && step.action !== 'approved' && (
               <div style={{ marginTop: 10 }}>
                 <button onClick={() => handleAction('approved')}>Approve</button>
 

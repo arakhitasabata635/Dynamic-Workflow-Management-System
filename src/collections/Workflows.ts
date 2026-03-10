@@ -95,13 +95,13 @@ export const Workflows: CollectionConfig = {
         })
 
         // run workflow again to move next step
-        const { runWorkflow } = await import('@/workflow/workflowEngine')
+        // const { runWorkflow } = await import('@/workflow/workflowEngine')
 
-        await runWorkflow({
-          payload,
-          collectionSlug,
-          document: doc,
-        })
+        // await runWorkflow({
+        //   payload,
+        //   collectionSlug,
+        //   document: doc,
+        // })
 
         return Response.json({
           success: true,
