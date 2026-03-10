@@ -155,10 +155,11 @@ export const Workflows: CollectionConfig = {
           collection: 'workflowLogs',
           where: {
             documentId: {
-              equals: docId,
+              equals: String(docId),
             },
           },
           sort: '-timestamp',
+          depth: 0,
         })
 
         return Response.json({

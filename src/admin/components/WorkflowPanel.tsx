@@ -1,11 +1,12 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { useDocumentInfo, useAuth } from '@payloadcms/ui'
+import { useRouter } from 'next/navigation'
 
 const WorkflowPanel: React.FC = () => {
   const { id, collectionSlug } = useDocumentInfo()
   const { user } = useAuth()
-  console.log(id, collectionSlug)
+  const router = useRouter()
   const [logs, setLogs] = useState<any>(null)
 
   const fetchStatus = async () => {
@@ -13,8 +14,8 @@ const WorkflowPanel: React.FC = () => {
 
     const res = await fetch(`/api/workflows/status/${id}`)
     const data = await res.json()
-
-    setLogs(data.logs[0])
+    console.log(data)
+    setLogs(data.logs)
   }
 
   useEffect(() => {
@@ -24,7 +25,7 @@ const WorkflowPanel: React.FC = () => {
   const handleAction = async (action: string) => {
     const comment = prompt('Optional comment')
 
-    await fetch('/api/workflows/action', {
+    const response = await fetch('/api/workflows/action', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -37,7 +38,12 @@ const WorkflowPanel: React.FC = () => {
       }),
     })
 
-    await fetchStatus()
+    if (response.ok) {
+      // 3. Force Next.js to refresh the background data
+      router.refresh()
+      // 4. Update your local component state
+      await fetchStatus()
+    }
   }
 
   if (!logs) return null
@@ -48,9 +54,7 @@ const WorkflowPanel: React.FC = () => {
 
       <h4>Steps</h4>
 
-      {logs?.workflow?.steps?.map((step: any, index: number) => {
-        const isCurrent = logs.stepName === step.stepName
-
+      {logs?.map((step: any, index: number) => {
         return (
           <div
             key={step.id}
@@ -59,26 +63,22 @@ const WorkflowPanel: React.FC = () => {
               padding: 12,
               marginBottom: 10,
               borderRadius: 6,
-              background: isCurrent ? '#4b4949' : '#161212',
+              background: index === 0 ? '#4b4949' : '#161212',
             }}
           >
             <strong>{step.stepName}</strong>
 
-            <div>Role: {step.assignedRole}</div>
+            <div>Role: {step.role}</div>
 
-            {isCurrent && (
-              <>
-                <div>Status: {logs.action}</div>
+            <div>Status: {step.action}</div>
 
-                <div>Time: {new Date(logs.timestamp).toLocaleString()}</div>
+            <div>Time: {new Date(step.timestamp).toLocaleString()}</div>
 
-                {logs.user && <div>User: {logs.user.email}</div>}
+            {step.user && <div>User: {step?.user}</div>}
 
-                {logs.comment && <div>Comment: {logs.comment}</div>}
-              </>
-            )}
+            {step.comment && <div>Comment: {logs.comment}</div>}
 
-            {user?.role === step.assignedRole && isCurrent && (
+            {user?.role === step.role && (
               <div style={{ marginTop: 10 }}>
                 <button onClick={() => handleAction('approved')}>Approve</button>
 
